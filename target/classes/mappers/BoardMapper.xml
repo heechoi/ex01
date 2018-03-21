@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dgit.mapper.BoardMapper">
+	<sql id="search">
+		<if test="searchType=='t'.toString()">
+			where title like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="searchType=='c'.toString()">
+			where content like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="searchType=='w'.toString()">
+			where writer like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="searchType=='tc'.toString()">
+			where title like CONCAT('%',#{keyword},'%') OR content like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="searchType=='cw'.toString()">
+			where writer like CONCAT('%',#{keyword},'%') OR content like CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="searchType=='tcw'.toString()">
+			where title like CONCAT('%',#{keyword},'%') OR content like CONCAT('%',#{keyword},'%')
+			OR writer like CONCAT('%',#{keyword},'%')
+		</if>
+	</sql>
+	
+	<select id="listAll" resultType="BoardVO">
+		select * from tbl_board order by regdate desc, bno desc
+	</select>
+	
+	<select id="listPage" resultType="BoardVO">
+		select * from tbl_board order by regdate desc, bno desc limit #{page},10
+	</select>
+	
+	<select id="listCriteria" resultType="BoardVO">
+		select * from tbl_board order by regdate desc, bno desc 
+		limit #{pageStart},#{perPageNum}
+	</select>
+	
+	<select id="listSearch" resultType="BoardVO">
+		select * from tbl_board 
+		<include refid="search"/>
+		order by regdate desc, bno desc 
+		limit #{pageStart},#{perPageNum}
+	</select>
+	
+	<select id="countPagin" resultType="int">
+		select count(bno) from tbl_board
+	</select>
+	
+	<select id="listSearchCount" resultType="int">
+		select count(bno) from tbl_board
+		<include refid="search"/>
+	</select>
+	
+	<select id="read" resultType="BoardVO">
+		select * from tbl_board where bno = #{bno} 
+	</select>
+	
+	<!-- insert를 실행한후 setbno를 이용해서 bno값을 채워넣어준다.  -->
+	<insert id="create" useGeneratedKeys="true" keyProperty="bno">
+		insert into tbl_board (title, content, writer) values(#{title},#{content},#{writer})
+	</insert>
+	
+	<update id="update">
+		update tbl_board set title=#{title},content=#{content} where bno=#{bno}
+	</update>
+	
+	<update id="updateViewcnt">
+		update tbl_board set viewcnt = #{viewcnt} where bno=#{bno} 
+	</update>
+	
+	<delete id="delete">
+		delete from tbl_board where bno=#{bno}
+	</delete>
+	
+	<update id="updateReplyCnt">
+		update tbl_board set replycnt = replycnt +#{amount} where bno=#{bno}
+	</update>
+	
+	<insert id="addAttach">
+		insert into tbl_attach(fullName,bno) values(#{fullName},#{bno})
+	</insert>
+	<select id="getAttach" resultType="String"> 
+		select fullName from tbl_attach where bno = #{bno} order by regdate
+	</select>
+	<delete id="deleteAttach">
+		delete from tbl_attach where bno=#{bno}
+	</delete>
+
+	<delete id="deleteFileName">
+		delete from tbl_attach where fullName=#{fullName}
+	</delete>
+</mapper>
