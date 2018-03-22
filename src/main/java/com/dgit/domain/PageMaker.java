@@ -33,7 +33,7 @@ public class PageMaker {
 		}
 		
 		next = true;
-		if(endPage * cri.getPerPageNum()>totalCount){
+		if(endPage * cri.getPerPageNum()>=totalCount){
 			next=false;
 		}
 	}
